@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Restingships</string>
+    <string name="app_name">RestingShips</string>
     <string name="menu_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="probe_label">Probe</string>
+    <string name="move_label">Move</string>
 
 </resources>
