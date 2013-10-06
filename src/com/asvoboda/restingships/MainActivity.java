@@ -214,10 +214,13 @@ public class MainActivity extends Activity implements OnHoverListener {
 		try {
 	    	if(((JSONArray)json.get("asteroids")).length() > 0) {
 	    		layout.setBackgroundColor(Color.RED);
+	    		text.setText("ASTEROID AHEAD");
 	    	} else if(((JSONArray)json.get("ships")).length() > 0) { 
 	    		layout.setBackgroundColor(Color.YELLOW);
+	    		text.setText("ANOTHER SHIP AHEAD");
 	    	} else if(((JSONArray)json.get("starStuff")).length() > 0) {
 	    		layout.setBackgroundColor(Color.GREEN);
+	    		text.setText("STAR STUFF AHEAD");
 	    	} else {
 	    		layout.setBackgroundColor(Color.WHITE);
 	    	}
