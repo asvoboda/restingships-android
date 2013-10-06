@@ -3,29 +3,23 @@ package com.asvoboda.restingships;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
-import android.view.Menu;
 import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnHoverListener;
 import android.widget.RelativeLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.asvoboda.restingships.OnSwipeTouchListener;
@@ -35,7 +29,7 @@ public class MainActivity extends Activity implements OnHoverListener {
 	// Declare the global text variable used across methods
 	private TextView text;
 	private String userName;
-	private String apiKey;
+	volatile private String apiKey;
 	private String urlBase = "http://18.111.90.66";
 	
 	private RelativeLayout layout;
@@ -59,29 +53,29 @@ public class MainActivity extends Activity implements OnHoverListener {
 		
 		//register new user
 		userName = UUID.randomUUID().toString();
-		System.out.println(userName);
+		//System.out.println(userName);
 		apiKey = postRegisterUser(userName);
 		final String urlPart = "/api/move.php";
 		
 		layout.setOnTouchListener(new OnSwipeTouchListener() {
 		    public void onSwipeTop() {
-		    	System.out.println("move up");
-		    	doPostRequest(urlPart, "Up", "Up", apiKey);
+		    	//System.out.println("move up");
+		    	doPOST(urlPart, "Up", "Up", apiKey);
 		    	
 		    }
 		    public void onSwipeRight() {
-		    	System.out.println("move right");
-		    	doPostRequest(urlPart, "Right", "Right", apiKey);
+		    	//System.out.println("move right");
+		    	doPOST(urlPart, "Right", "Right", apiKey);
 		    	
 		    }
 		    public void onSwipeLeft() {
-		    	System.out.println("move left");
-		    	doPostRequest(urlPart, "Left", "Left", apiKey);
+		    	//System.out.println("move left");
+		    	doPOST(urlPart, "Left", "Left", apiKey);
 		    	
 		    }
 		    public void onSwipeBottom() {
-		    	System.out.println("move down");
-		    	doPostRequest(urlPart, "Down", "Down", apiKey);
+		    	//System.out.println("move down");
+		    	doPOST(urlPart, "Down", "Down", apiKey);
 		    }
 		});
 		
@@ -91,22 +85,22 @@ public class MainActivity extends Activity implements OnHoverListener {
 	// For whenever a hover event is triggered on an element being listened to
 	public boolean onHover(View v, MotionEvent e) {
 		// Depending on what action is performed, set the text to that action
-		final String urlPart = "/api/probe.php";
+		final String urlPart = "/api/status.php";
 		switch (e.getActionMasked()) {
 		case MotionEvent.ACTION_HOVER_ENTER:
 			text.setText("ACTION_HOVER_ENTER");
 			if(e.getX() > 800.0 && e.getY() < 1100.0 && e.getY() > 300.0) {
-				System.out.println("hover right");
-				doPostRequest(urlPart, "Right", "Right", apiKey);
+				//System.out.println("hover right");
+				doGET(urlPart,"Right", apiKey);
 			} else if(e.getX() < 300.0 && e.getY() < 1100.0 && e.getY() > 300.0) {
-				System.out.println("hover left");
-				doPostRequest(urlPart, "Left", "Left", apiKey);
+				//System.out.println("hover left");
+				doGET(urlPart, "Left", apiKey);
 			} else if(e.getY() > 1100.0 && e.getX() < 800.0 && e.getX() > 300.0) {
-				System.out.println("hover down");
-				doPostRequest(urlPart, "Down", "Down", apiKey);
+				//System.out.println("hover down");
+				doGET(urlPart, "Down", apiKey);
 			} else if(e.getY() < 400.0 && e.getX() < 800.0 && e.getX() > 300.0) {
-				System.out.println("hover up");
-				doPostRequest(urlPart, "Up", "Up", apiKey);
+				//System.out.println("hover up");
+				doGET(urlPart, "Up", apiKey);
 			}
 			
 			break;
@@ -143,7 +137,6 @@ public class MainActivity extends Activity implements OnHoverListener {
 	    	}
 	    	InputStream response = connection.getInputStream();
 	    	String res = convertStreamToString(response);
-	    	System.out.println(res);
 	    	JSONObject jsonObj = new JSONObject(res);
 	    	return (String) jsonObj.get("api_key");
 			
@@ -159,19 +152,43 @@ public class MainActivity extends Activity implements OnHoverListener {
 	    return s.hasNext() ? s.next() : "";
 	}
 	
-	private void doPostRequest(String urlPart, String direction, String focus_scan, String apiKey){
+	private void doGET(String urlPart, String focus_scan, String api_key){
 	    String charset = "UTF-8";
-	    System.out.println(apiKey);
+	    try {
+	    	String query = String.format("focus_scan=%s&api_key=%s", 
+	    		     URLEncoder.encode(focus_scan, charset), 
+	    		     URLEncoder.encode(api_key, charset));
+	    	String url = urlBase + urlPart + "?" + query;
+
+	    	HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+	    	connection.setRequestProperty("Accept-Charset", charset);
+
+	    	//InputStream response = connection.getInputStream();
+	    	InputStream response = new URL(url).openStream();
+	    	
+	    	String res = convertStreamToString(response);
+	    	System.out.println(res);
+	    	JSONObject json  = new JSONObject(res);
+	    	checkReturnResultAndUpdateBackground(json);
+
+	    } catch (Exception ex){
+	        System.out.println("error: " + ex.getMessage());
+	    }
+	} 
+	
+	private void doPOST(String urlPart, String direction, String focus_scan, String apiKey){
+	    String charset = "UTF-8";
 	    try {
 	    	
 	    	HttpURLConnection connection = (HttpURLConnection) new URL(urlBase + urlPart).openConnection();
-	    	connection.setDoOutput(true); // Triggers POST.
+	    	
 	    	connection.setDoInput(true);
-	    	connection.setRequestMethod("POST");  
-	    	String query = String.format("focus_scan=%s&direction=%s&api_key=%s", 
+    		connection.setDoOutput(true); // Triggers POST.
+    		connection.setRequestMethod("POST");  
+	    	String query = String.format("focus_scan=%s&api_key=%s&direction=%s", 
 	    		     URLEncoder.encode(focus_scan, charset), 
-	    		     URLEncoder.encode(direction, charset),
-	    		     URLEncoder.encode(apiKey, charset));
+	    		     URLEncoder.encode(apiKey, charset),
+	    		     URLEncoder.encode(direction, charset));
 	    	
 	    	connection.setRequestProperty("Accept-Charset", charset);
 	    	connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
@@ -183,21 +200,29 @@ public class MainActivity extends Activity implements OnHoverListener {
 	    	     try { output.close(); } catch (IOException logOrIgnore) {}
 	    	}
 	    	InputStream response = connection.getInputStream();
+	    	
 	    	String res = convertStreamToString(response);
-	    	System.out.println(res);
-	    	JSONObject json  = new JSONObject(res);
-	    	if(((JSONArray)json.get("asteroids")).length() > 0) {
-	    		layout.setBackgroundColor(Color.RED);
-	    	} else if(((JSONArray)json.get("ships")).length() > 0) { 
-	    		layout.setBackgroundColor(Color.GREEN);
-	    	} else if(((JSONArray)json.get("starStuff")).length() > 0) {
-	    		layout.setBackgroundColor(Color.YELLOW);
-	    	} else {
-	    		layout.setBackgroundColor(Color.WHITE);
-	    	}
+	    	JSONObject json = new JSONObject(res);
+	    	checkReturnResultAndUpdateBackground(json);
 
 	    } catch (Exception ex){
 	        System.out.println("error: " + ex.getMessage());
 	    }
 	} 
+	
+	private void checkReturnResultAndUpdateBackground(JSONObject json) {
+		try {
+	    	if(((JSONArray)json.get("asteroids")).length() > 0) {
+	    		layout.setBackgroundColor(Color.RED);
+	    	} else if(((JSONArray)json.get("ships")).length() > 0) { 
+	    		layout.setBackgroundColor(Color.YELLOW);
+	    	} else if(((JSONArray)json.get("starStuff")).length() > 0) {
+	    		layout.setBackgroundColor(Color.GREEN);
+	    	} else {
+	    		layout.setBackgroundColor(Color.WHITE);
+	    	}
+		} catch(JSONException e) {
+			System.out.println("error: " + e.toString());
+		}
+	}
 }
