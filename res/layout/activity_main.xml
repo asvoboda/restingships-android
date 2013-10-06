@@ -4,9 +4,10 @@
 	android:layout_height="match_parent"
 	android:padding="16dp" >
 	<TextView
-	    android:id="@+id/text"
+		android:id="@+id/text"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerHorizontal="true"
+		android:text="@string/help_text"
 		android:layout_centerVertical="true" />
 </RelativeLayout>

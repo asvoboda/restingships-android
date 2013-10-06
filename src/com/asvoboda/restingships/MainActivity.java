@@ -5,6 +5,7 @@ import android.os.StrictMode;
 import android.app.Activity;
 import android.graphics.Color;
 import android.widget.TextView;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnHoverListener;
@@ -30,7 +31,7 @@ public class MainActivity extends Activity implements OnHoverListener {
 	private TextView text;
 	private String userName;
 	volatile private String apiKey;
-	private String urlBase = "http://18.111.90.66";
+	private String urlBase = "http://restingships-seanpo.rhcloud.com";
 	
 	private RelativeLayout layout;
 	
@@ -53,29 +54,25 @@ public class MainActivity extends Activity implements OnHoverListener {
 		
 		//register new user
 		userName = UUID.randomUUID().toString();
-		//System.out.println(userName);
 		apiKey = postRegisterUser(userName);
 		final String urlPart = "/api/move.php";
 		
 		layout.setOnTouchListener(new OnSwipeTouchListener() {
 		    public void onSwipeTop() {
-		    	//System.out.println("move up");
 		    	doPOST(urlPart, "Up", "Up", apiKey);
-		    	
+		    	text.setText("MOVE UP");
 		    }
 		    public void onSwipeRight() {
-		    	//System.out.println("move right");
 		    	doPOST(urlPart, "Right", "Right", apiKey);
-		    	
+		    	text.setText("MOVE RIGHT");
 		    }
 		    public void onSwipeLeft() {
-		    	//System.out.println("move left");
 		    	doPOST(urlPart, "Left", "Left", apiKey);
-		    	
+		    	text.setText("MOVE LEFT");
 		    }
 		    public void onSwipeBottom() {
-		    	//System.out.println("move down");
 		    	doPOST(urlPart, "Down", "Down", apiKey);
+		    	text.setText("MOVE DOWN");
 		    }
 		});
 		
@@ -88,31 +85,26 @@ public class MainActivity extends Activity implements OnHoverListener {
 		final String urlPart = "/api/status.php";
 		switch (e.getActionMasked()) {
 		case MotionEvent.ACTION_HOVER_ENTER:
-			text.setText("ACTION_HOVER_ENTER");
+			//text.setText("ACTION_HOVER_ENTER");
+			//just for the galaxy s4
 			if(e.getX() > 800.0 && e.getY() < 1100.0 && e.getY() > 300.0) {
-				//System.out.println("hover right");
 				doGET(urlPart,"Right", apiKey);
+				text.setText("CHECK RIGHT");
 			} else if(e.getX() < 300.0 && e.getY() < 1100.0 && e.getY() > 300.0) {
-				//System.out.println("hover left");
 				doGET(urlPart, "Left", apiKey);
+				text.setText("CHECK LEFT");
 			} else if(e.getY() > 1100.0 && e.getX() < 800.0 && e.getX() > 300.0) {
-				//System.out.println("hover down");
 				doGET(urlPart, "Down", apiKey);
+				text.setText("CHECK DOWN");
 			} else if(e.getY() < 400.0 && e.getX() < 800.0 && e.getX() > 300.0) {
-				//System.out.println("hover up");
 				doGET(urlPart, "Up", apiKey);
+				text.setText("CHECK UP");
 			}
 			
 			break;
-		case MotionEvent.ACTION_HOVER_MOVE:
-			text.setText("ACTION_HOVER_MOVE");
-			break;
-		case MotionEvent.ACTION_HOVER_EXIT:
-			text.setText("ACTION_HOVER_EXIT");
-			break;
 		}
 		// Along with the event name, also print the XY location of the data
-		text.setText(text.getText() + " - X: " + e.getX() + " - Y: " + e.getY());
+		//text.setText(text.getText() + " - X: " + e.getX() + " - Y: " + e.getY());
 		return true;
 	}
 	
@@ -167,7 +159,6 @@ public class MainActivity extends Activity implements OnHoverListener {
 	    	InputStream response = new URL(url).openStream();
 	    	
 	    	String res = convertStreamToString(response);
-	    	System.out.println(res);
 	    	JSONObject json  = new JSONObject(res);
 	    	checkReturnResultAndUpdateBackground(json);
 
@@ -223,6 +214,7 @@ public class MainActivity extends Activity implements OnHoverListener {
 	    		text.setText("STAR STUFF AHEAD");
 	    	} else {
 	    		layout.setBackgroundColor(Color.WHITE);
+	    		text.setText("ALL CLEAR AHEAD");
 	    	}
 		} catch(JSONException e) {
 			System.out.println("error: " + e.toString());

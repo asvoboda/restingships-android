@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RestingShips</string>
+    <string name="app_name">RESTing Ships</string>
     <string name="menu_settings">Settings</string>
-    <string name="probe_label">Probe</string>
-    <string name="move_label">Move</string>
+    
+	<string name="help_text">Use the <i>Hover</i> gesture from Synaptics to look ahead. 
+	    You can hover your finger over the top, bottom, left and right portions of the screen.
+	    Use the <i>Swipe</i> gesture to move your ship. 
+	    You can swipe up, down, left and right to move your ship respectively.</string>
 
 </resources>
